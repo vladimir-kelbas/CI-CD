@@ -1,0 +1,40 @@
+name: Integration tests
+
+on:
+
+  workflow_dispatch:
+
+jobs:
+
+  tests:
+
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root   # sets root password
+          MYSQL_DATABASE: testdb      # optional: auto-create a DB
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Wait for MySQL to be ready
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; do
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
+
+
+
+ 
